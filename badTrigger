@@ -1,0 +1,136 @@
+﻿ALTER TABLE museum
+DROP COLUMN adres_id;
+ALTER TABLE excursion
+DROP COLUMN museum_id;
+drop table museum;
+ALTER TABLE tourist
+DROP COLUMN adres_id;
+ALTER TABLE sights
+DROP COLUMN adres_id;
+drop table adres;
+ALTER TABLE excursion
+DROP COLUMN bikeRaces_id;
+drop table bikeRaces;
+ALTER TABLE excursion
+DROP COLUMN sights_id;
+drop table sights;
+ALTER TABLE tourist
+DROP COLUMN excursion_id;
+drop table excursion;
+drop table tourist;
+drop sequence adr_seq;
+drop sequence mus_seq;
+drop sequence bike_seq;
+drop sequence sig_seq;
+drop sequence exc_seq;
+drop sequence tou_seq;
+
+--1
+create table adres(
+    adres_id integer primary key,
+    street varchar2(200) default null,
+    house integer default null,
+    flat integer default null
+);
+
+--3
+create table museum(
+    museum_id integer primary key,
+    name varchar2(200) not null,
+    bussNr number default null, --bus that will deliver you
+    cena number not null,
+    webPage varchar2(200) default 'Sorry.We will create soon',
+    rating number(3) not null, --procents    
+    adres_id integer not null,
+        foreign key(adres_id) references adres(adres_id),
+    tesis varchar2(200) default null
+);
+
+--3trg
+create or replace trigger mus_trg 
+ before update or insert on museum
+ for each row
+ 
+ declare
+ var int;
+begin
+ select rating end into var from museum;
+ if var > 100 then
+    :new.tesis := null;
+ elsif var > 97 then
+    :new.tesis := 'Uncredible';
+ elsif var > 93 then
+    :new.tesis := 'Nice';
+ elsif var > 88 then
+    :new.tesis := 'Normal';
+ elsif var > 85 then
+    :new.tesis := 'So so';
+ elsif var >= 0 then
+    :new.tesis := 'Could be better';   
+ elsif var < 0 then
+    :new.tesis := null;   
+ end if;
+end;
+/
+
+--some modifications
+alter table adres
+add city varchar2(200) not null;
+
+--inserting tables
+create sequence adr_seq start with 1 increment by 1;
+select*from adres;
+insert into adres values (adr_seq.nextval, 'Okolnik', 1, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Wybrzeze Kosciukowskie', 20, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Lipowa', 4, default, 'Krakow');
+insert into adres values (adr_seq.nextval, 'Bernardyncka', 5, default, 'Wroclaw');
+insert into adres values (adr_seq.nextval, 'Ogrodowa', 19, default, 'Lodz');
+insert into adres values (adr_seq.nextval, 'sw. Jana', 19, default, 'Krakow');
+insert into adres values (adr_seq.nextval, 'Dworna', 22, default, 'Lomza');
+insert into adres values (adr_seq.nextval, 'plac Zamkowy', 4, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Mariacka', 25, default, 'Gdansk');
+insert into adres values (adr_seq.nextval, 'Dluga', 46, default, 'Gdansk');
+
+
+create sequence mus_seq start with 1 increment by 1;
+--drop sequence mus_seq;
+select*from museum;
+insert into museum values (mus_seq.nextval, 'Fryderyk Chopin', 
+                            158, 15, 'www.chopin.museum/',
+                            84, (select adres_id from adres where city = 'Warsaw' and street = 'Okolnik'),default);
+insert into museum values (mus_seq.nextval, 'Centrum Nauki Kopernik', 
+                            97, 31, 'www.kopernik.org.pl/',
+                            92, (select adres_id from adres where city = 'Warsaw' and street = 'Wybrzeze Kosciukowskie'), default);
+insert into museum values (mus_seq.nextval, 'MOCAK', 
+                            533, 10, 'www.mocak.pl/',
+                            90, (select adres_id from adres where city = 'Krakow' and street = 'Lipowa'),default);
+insert into museum values (mus_seq.nextval, 'Architecture', 
+                            107, 0, 'www.ma.wroc.pl/',
+                            86, (select adres_id from adres where city = 'Wroclaw' and street = 'Bernardyncka'),default);
+insert into museum values (mus_seq.nextval, 'Art', 
+                            15, 20, 'www.msl.org.pl/',
+                            88, (select adres_id from adres where city = 'Lodz' and street = 'Ogrodowa'),default);
+insert into museum values (mus_seq.nextval, 'Chartorical Palace', 
+                            default, 15, 'www.muk.pl/',
+                            100, (select adres_id from adres where city = 'Krakow' and street = 'sw. Jana'),default);
+insert into museum values (mus_seq.nextval, 'North Mazowieckie', 
+                            76, 10, 'www.4lomza.pl/',
+                            94, (select adres_id from adres where city = 'Lomza' and street = 'Dworna'),default);
+insert into museum values (mus_seq.nextval, 'Archeological', 
+                            333, 25, 'www.archaelogia.pl/',
+                            90, (select adres_id from adres where city = 'Gdansk' and street = 'Mariacka'),default);
+insert into museum values (mus_seq.nextval, 'MHMG', 
+                            205, 15, 'www.mhmg.pl/',
+                            92, (select adres_id from adres where city = 'Gdansk' and street = 'Dluga'),default);
+insert into museum values (mus_seq.nextval, 'Royal Castle', 
+                            287, 30, 'www.zamek-krolewski.pl/',
+                            92, (select adres_id from adres where city = 'Warsaw' and street = 'plac Zamkowy'),default);
+
+
+
+
+
+
+
+select * from adres;
+select * from museum;

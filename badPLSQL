@@ -1,0 +1,60 @@
+﻿ALTER TABLE museum
+DROP COLUMN adres_id;
+ALTER TABLE excursion
+DROP COLUMN museum_id;
+drop table museum;
+ALTER TABLE tourist
+DROP COLUMN adres_id;
+ALTER TABLE sights
+DROP COLUMN adres_id;
+drop table adres;
+ALTER TABLE excursion
+DROP COLUMN bikeRaces_id;
+drop table bikeRaces;
+ALTER TABLE excursion
+DROP COLUMN sights_id;
+drop table sights;
+ALTER TABLE tourist
+DROP COLUMN excursion_id;
+drop table excursion;
+drop table tourist;
+drop sequence adr_seq;
+drop sequence mus_seq;
+drop sequence bike_seq;
+drop sequence sig_seq;
+drop sequence exc_seq;
+drop sequence tou_seq;
+
+--1
+create table adres(
+    adres_id integer primary key,
+    street varchar2(200) default null,
+    house integer default null,
+    flat integer default null
+);
+--some modifications
+alter table adres
+add city varchar2(200) not null;
+
+create sequence adr_seq start with 1 increment by 1;
+
+create or replace procedure fill_adres(street in varchar2, house integer, flat integer, city in varchar2)
+is
+    streetName varchar2(200) := street;
+    houseNum integer := house;
+    flatNum integer := flat;
+    cityName varchar2(200) := city;
+begin
+    execute immediate
+      'insert into adres values (adr_seq.nextval,  ' || streetName  || ',' || houseNum  || ',' || flatNum  || ',' || cityName  || ')';
+    commit;
+end;
+/
+set serveroutput on
+exec fill_adres('Dluga', 46, 0, 'Gdansk');
+
+select *from adres;
+
+
+
+

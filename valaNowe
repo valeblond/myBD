@@ -1,0 +1,51 @@
+﻿-----------------------
+--group by
+-----------------------
+select * from bikeRaces;
+
+select city, sum(kmLong) as km_tours, avg(cena) as sr_cena
+from bikeRaces group by city order by 2 desc;
+
+select distinct city, sum(kmLong) over (partition by city) as liczba from bikeRaces;
+
+select * from sights s join adres a on s.adres_id = a.adres_id;
+
+select a.city, count(*) as liczba
+from sights s join adres a on s.adres_id = a.adres_id
+group by a.city
+order by 2;
+
+select a.city, count(*) as liczba
+from sights s join adres a using(adres_id)
+group by a.city
+having count(*) > 1
+order by 2;
+
+----------------------
+--podzapytania
+----------------------
+select * from excursion;
+
+--it shows names who has any bikeRace
+select t.name, t.phoneNumber, e.cityVisit, b.name as bike_road
+from tourist t join excursion e using(excursion_id)
+join bikeRaces b using(bikeRaces_id);
+
+--excursions in the same cities where museums are
+select e.excursion_id
+from excursion e
+where e.cityVisit in (
+select a.city 
+from museum m join adres a using (adres_id));
+
+--excursions that our visitors didn't choose
+select e.excursion_id 
+from excursion e
+where e.excursion_id not in(
+select e.excursion_id 
+from  tourist t join excursion e 
+on e.excursion_id = t.excursion_id);
+
+
+
+

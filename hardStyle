@@ -1,0 +1,419 @@
+﻿ALTER TABLE museum
+DROP COLUMN adres_id;
+ALTER TABLE excursion
+DROP COLUMN museum_id;
+drop table museum;
+ALTER TABLE tourist
+DROP COLUMN adres_id;
+ALTER TABLE sights
+DROP COLUMN adres_id;
+drop table adres;
+ALTER TABLE excursion
+DROP COLUMN bikeRaces_id;
+drop table bikeRaces;
+ALTER TABLE excursion
+DROP COLUMN sights_id;
+drop table sights;
+ALTER TABLE tourist
+DROP COLUMN excursion_id;
+drop table excursion;
+drop table tourist;
+drop sequence adr_seq;
+drop sequence mus_seq;
+drop sequence bike_seq;
+drop sequence sig_seq;
+drop sequence exc_seq;
+drop sequence tou_seq;
+
+--1
+create table adres(
+    adres_id integer primary key,
+    street varchar2(200) default null,
+    house integer default null,
+    flat integer default null
+);
+
+--2
+create table bikeRaces(
+    bikeRaces_id integer primary key,
+    name varchar2(200) not null,
+    difficulty number not null, --1)easy; 2)usual; 3)difficult; 4) dangerous 
+    kmLong number not null,
+    webPage varchar2(200) default 'Sorry.We will create soon',
+    rating number(3), --procents
+    cena number default null
+);
+ALTER TABLE bikeRaces
+MODIFY cena DEFAULT 0;
+alter table bikeRaces 
+add city varchar(200) not null;
+
+--3
+create table museum(
+    museum_id integer primary key,
+    name varchar2(200) not null,
+    bussNr number default null, --bus that will deliver you
+    cena number not null,
+    webPage varchar2(200) default 'Sorry.We will create soon',
+    rating number(3), --procents    
+    adres_id integer not null,
+        foreign key(adres_id) references adres(adres_id)
+);
+
+--4
+create table sights(
+    sights_id integer primary key,
+    name varchar2(200) not null,
+    bussNr number default null, --bus that will deliver you
+    rating number(3), --procents 
+    adres_id integer not null,
+        foreign key(adres_id) references adres(adres_id)
+);
+
+--5
+create table excursion(
+    excursion_id integer primary key,
+    museum_id number default null,
+        foreign key(museum_id) references museum(museum_id),
+    bikeRaces_id number default null,
+        foreign key(bikeRaces_id) references bikeRaces(bikeRaces_id),
+    sights_id number default null,
+        foreign key(sights_id) references sights(sights_id),
+    cityVisit varchar2(200) not null
+);
+
+--6
+create table tourist (
+    tourist_id integer primary key,
+    name varchar2(200) not null,
+    surname varchar2(200) default null,
+    phoneNumber integer not null,
+    adres_id integer not null,
+        foreign key(adres_id) references adres(adres_id),
+    excursion_id integer not null,
+        foreign key(excursion_id) references excursion(excursion_id)
+);
+
+--some modifications
+alter table adres
+add city varchar2(200) not null;
+
+--inserting tables
+create sequence adr_seq start with 1 increment by 1;
+select*from adres;
+insert into adres values (adr_seq.nextval, 'Okolnik', 1, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Wybrzeze Kosciukowskie', 20, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Lipowa', 4, default, 'Krakow');
+insert into adres values (adr_seq.nextval, 'Bernardyncka', 5, default, 'Wroclaw');
+insert into adres values (adr_seq.nextval, 'Ogrodowa', 19, default, 'Lodz');
+insert into adres values (adr_seq.nextval, 'sw. Jana', 19, default, 'Krakow');
+insert into adres values (adr_seq.nextval, 'Dworna', 22, default, 'Lomza');
+insert into adres values (adr_seq.nextval, 'plac Zamkowy', 4, default, 'Warsaw');
+insert into adres values (adr_seq.nextval, 'Mariacka', 25, default, 'Gdansk');
+insert into adres values (adr_seq.nextval, 'Dluga', 46, default, 'Gdansk');
+
+create sequence mus_seq start with 1 increment by 1;
+--drop sequence mus_seq;
+select*from museum;
+insert into museum values (mus_seq.nextval, 'Fryderyk Chopin', 
+                            158, 15, 'www.chopin.museum/',
+                            84, (select adres_id from adres where city = 'Warsaw' and street = 'Okolnik'));
+insert into museum values (mus_seq.nextval, 'Centrum Nauki Kopernik', 
+                            97, 31, 'www.kopernik.org.pl/',
+                            92, (select adres_id from adres where city = 'Warsaw' and street = 'Wybrzeze Kosciukowskie'));
+insert into museum values (mus_seq.nextval, 'MOCAK', 
+                            533, 10, 'www.mocak.pl/',
+                            90, (select adres_id from adres where city = 'Krakow' and street = 'Lipowa'));
+insert into museum values (mus_seq.nextval, 'Architecture', 
+                            107, 0, 'www.ma.wroc.pl/',
+                            86, (select adres_id from adres where city = 'Wroclaw' and street = 'Bernardyncka'));
+insert into museum values (mus_seq.nextval, 'Art', 
+                            15, 20, 'www.msl.org.pl/',
+                            88, (select adres_id from adres where city = 'Lodz' and street = 'Ogrodowa'));
+insert into museum values (mus_seq.nextval, 'Chartorical Palace', 
+                            default, 15, 'www.muk.pl/',
+                            100, (select adres_id from adres where city = 'Krakow' and street = 'sw. Jana'));
+insert into museum values (mus_seq.nextval, 'North Mazowieckie', 
+                            76, 10, 'www.4lomza.pl/',
+                            94, (select adres_id from adres where city = 'Lomza' and street = 'Dworna'));
+insert into museum values (mus_seq.nextval, 'Archeological', 
+                            333, 25, 'www.archaelogia.pl/',
+                            90, (select adres_id from adres where city = 'Gdansk' and street = 'Mariacka'));
+insert into museum values (mus_seq.nextval, 'MHMG', 
+                            205, 15, 'www.mhmg.pl/',
+                            92, (select adres_id from adres where city = 'Gdansk' and street = 'Dluga'));
+insert into museum values (mus_seq.nextval, 'Royal Castle', 
+                            287, 30, 'www.zamek-krolewski.pl/',
+                            92, (select adres_id from adres where city = 'Warsaw' and street = 'plac Zamkowy'));
+
+create sequence bike_seq start with 1 increment by 1;
+select*from bikeRaces;
+insert into bikeRaces values (bike_seq.nextval, 'Down Beach', 2, 72, default, 70, default, 'Wroclaw');
+insert into bikeRaces values (bike_seq.nextval, 'Near Wisla', 1, 47, default, 90, default, 'Warsaw');
+insert into bikeRaces values (bike_seq.nextval, 'Round Center', 3, 31, 'www.rowercentrum.pl/', 85, default, 'Wroclaw');
+insert into bikeRaces values (bike_seq.nextval, 'Kaszebe Velo 3', 4, 99, 'www.czasnarower.pl/', 93, 30, 'Gdynia');
+insert into bikeRaces values (bike_seq.nextval, 'Ground trail', 4, 242, default, 90, 20, 'Poznan');
+insert into bikeRaces values (bike_seq.nextval, 'Poronin', 2, 17, default, 80, 10, 'Zakopane');
+insert into bikeRaces values (bike_seq.nextval, 'Bukowina Tatrzanska', 3, 52, default, 90, 40, 'Zakopane');
+
+select*from adres;
+insert into adres values (adr_seq.nextval, 'Kosciuszki', default, default, 'Sopot' );
+insert into adres values (adr_seq.nextval, 'Na Grobki', 19, default, 'Wroclaw' );
+insert into adres values (adr_seq.nextval, 'Monte Cassino', 53, default, 'Sopot' );
+insert into adres values (adr_seq.nextval, 'Stanislawa Kostki Potockiego', 14, default, 'Warsaw' );
+insert into adres values (adr_seq.nextval, 'Targowa', 3, default, 'Lodz' );
+insert into adres values (adr_seq.nextval, 'Monte Cassino', default, default, 'Sopot' );
+insert into adres values (adr_seq.nextval, 'plac Defilad', 1, default, 'Warsaw' );
+insert into adres values (adr_seq.nextval, 'Warszawska', 3, default, 'Biala Podlaska' );
+insert into adres values (adr_seq.nextval, 'Wroblewskiego', 51, default, 'Wroclaw' );
+insert into adres values (adr_seq.nextval, 'rynek Staromiejski', 87, default, 'Torun' );
+
+select *  from sights;
+create sequence sig_seq start with 1 increment by 1;
+insert into sights values (sig_seq.nextval, 'Pier in Sopot', 
+                            25, 90,
+                            (select adres_id from adres where city = 'Sopot' and street = 'Kosciuszki' and house is null));  
+insert into sights values (sig_seq.nextval, 'Hydropolis', 
+                            799, 86,
+                            (select adres_id from adres where city = 'Wroclaw' and street = 'Na Grobki' and house = 19));
+insert into sights values (sig_seq.nextval, 'Crooked House', 
+                            default, 84,
+                            (select adres_id from adres where city = 'Sopot' and street = 'Monte Cassino' and house = 53));
+insert into sights values (sig_seq.nextval, 'Palace in Wilanow', 
+                            523, 95,
+                            (select adres_id from adres where city = 'Warsaw' and street = 'Stanislawa Kostki Potockiego' and house = 14));
+insert into sights values (sig_seq.nextval, 'Planetarium EC1', 
+                            205, 86,
+                            (select adres_id from adres where city = 'Lodz' and street = 'Targowa' and house = 3));
+insert into sights values (sig_seq.nextval, 'Fountain with a statue of a fisherman', 
+                            default, 78,
+                            (select adres_id from adres where city = 'Sopot' and street = 'Monte Cassino' and house is null));
+insert into sights values (sig_seq.nextval, 'Palace of Culture and Science', 
+                            default, 92,
+                            (select adres_id from adres where city = 'Warsaw' and street = 'plac Defilad' and house = 1));
+insert into sights values (sig_seq.nextval, 'Saint Anne"s church', 
+                            89, 73,
+                            (select adres_id from adres where city = 'Biala Podlaska' and street = 'Warszawska' and house = 3));
+insert into sights values (sig_seq.nextval, 'ZOO Wroclaw Afrykarium', 
+                            444, 98,
+                            (select adres_id from adres where city = 'Wroclaw' and street = 'Wroblewskiego' and house = 51));
+insert into sights values (sig_seq.nextval, 'Monument to Nicolas Copernicus', 
+                            235, 80,
+                            (select adres_id from adres where city = 'Torun' and street = 'rynek Staromiejski' and house = 87));
+
+select * from excursion;
+create sequence exc_seq start with 1 increment by 1;
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Warsaw' and m.name = 'Centrum Nauki Kopernik' ),
+                           default,default,'Warsaw');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Warsaw' and m.name = 'Fryderyk Chopin' ),
+                           (select bikeRaces_id from bikeRaces where city = 'Warsaw' and name = 'Near Wisla'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Warsaw' and s.name = 'Palace in Wilanow' ),
+                           'Warsaw');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           (select bikeRaces_id from bikeRaces where city = 'Wroclaw' and name = 'Round Center'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Wroclaw' and s.name = 'ZOO Wroclaw Afrykarium' ),
+                           'Wroclaw');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Gdansk' and m.name = 'Archeological' ),
+                           (select bikeRaces_id from bikeRaces where city = 'Gdynia' and name = 'Kaszebe Velo 3'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Sopot' and s.name = 'Crooked House' ),
+                           'Gdansk');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Biala Podlaska' and s.name = 'Saint Anne"s church' ),
+                           'Biala Podlaska');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           (select bikeRaces_id from bikeRaces where city = 'Zakopane' and name = 'Bukowina Tatrzanska'),
+                           default,
+                           'Zakopane');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Gdansk' and m.name = 'MHMG' ),
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Sopot' and s.name = 'Pier in Sopot' ),
+                           'Sopot');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Krakow' and m.name = 'Chartorical Palace' ),
+                           (select bikeRaces_id from bikeRaces where city = 'Zakopane' and name = 'Poronin'),
+                           default,
+                           'Krakow');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           (select bikeRaces_id from bikeRaces where city = 'Poznan' and name = 'Ground trail'),
+                           default,
+                           'Poznan');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Warsaw' and m.name = 'Royal Castle' ),
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Warsaw' and s.name = 'Palace of Culture and Science' ),
+                           'Warsaw');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Torun' and s.name = 'Monument to Nicolas Copernicus' ),
+                           'Torun');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           (select bikeRaces_id from bikeRaces where city = 'Wroclaw' and name = 'Down Beach'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Wroclaw' and s.name = 'Hydropolis' ),
+                           'Wroclaw');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Lodz' and m.name = 'Art' ),
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Lodz' and s.name = 'Planetarium EC1' ),
+                           'Lodz');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           (select bikeRaces_id from bikeRaces where city = 'Gdynia' and name = 'Kaszebe Velo 3'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Sopot' and s.name = 'Fountain with a statue of a fisherman' ),
+                           'Sopot');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Lomza' and m.name = 'North Mazowieckie' ),
+                           default,
+                           default,
+                           'Lomza');
+insert into excursion values (exc_seq.nextval, 
+                           (select m.museum_id from museum m join adres a on m.adres_id = a.adres_id and a.city = 'Wroclaw' and m.name = 'Architecture' ),
+                           (select bikeRaces_id from bikeRaces where city = 'Wroclaw' and name = 'Down Beach'),
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Wroclaw' and s.name = 'ZOO Wroclaw Afrykarium' ),
+                           'Wroclaw');
+insert into excursion values (exc_seq.nextval, 
+                           default,
+                           default,
+                           (select s.sights_id from sights s join adres a on s.adres_id = a.adres_id and a.city = 'Sopot' and s.name = 'Pier in Sopot' ),
+                           'Sopot');
+
+select*from adres;
+insert into adres values (adr_seq.nextval, 'Koszykowa', 7, 23, 'Warsaw' );
+insert into adres values (adr_seq.nextval, 'Obywatelska', 97, 4, 'Lodz' );
+insert into adres values (adr_seq.nextval, 'Dworcowa', 235, default, 'Wroclaw' );
+insert into adres values (adr_seq.nextval, 'Nowy Swiat', 13, 12, 'Wroclaw' );
+insert into adres values (adr_seq.nextval, 'Brzeska', 19, 3, 'Biala Podlaska' );
+insert into adres values (adr_seq.nextval, 'Warynskiego', 12, 1207, 'Warsaw' );
+insert into adres values (adr_seq.nextval, 'Reformacka', 47, 103, 'Krakow' );
+insert into adres values (adr_seq.nextval, 'Szkolna', 15, 94, 'Zakopane' );
+insert into adres values (adr_seq.nextval, 'Hucisko', 20, 5, 'Gdansk' );
+insert into adres values (adr_seq.nextval, 'Krotka', 55, default, 'Sopot' );
+insert into adres values (adr_seq.nextval, 'Harcerska', 102, 28, 'Lomza' );
+insert into adres values (adr_seq.nextval, 'Lukaszowki', 33, 10, 'Zakopane' );
+insert into adres values (adr_seq.nextval, 'Koscieliska', 79, 208, 'Zakopane' );
+insert into adres values (adr_seq.nextval, 'Zelazna', 109, 503, 'Warsaw' );
+insert into adres values (adr_seq.nextval, 'Taczaka', 180, 23, 'Poznan' );
+
+select * from tourist;
+create sequence tou_seq start with 1 increment by 1;
+insert into tourist values (tou_seq.nextval,'Mike', 'Szczeka', 793278135, 
+                           (select adres_id from adres where city = 'Zakopane' and street = 'Szkolna' and house = 15 ),
+                           (select e.excursion_id from excursion e join bikeRaces b 
+                             on e.bikeRaces_id = b.bikeRaces_id and e.cityVisit = 'Zakopane' and b.name = 'Bukowina Tatrzanska'));
+insert into tourist values (tou_seq.nextval,'Jakub', 'Dymowski', 835618613, 
+                           (select adres_id from adres where city = 'Wroclaw' and street = 'Dworcowa' and house = 235),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Wroclaw' and m.name = 'Architecture'
+                            intersect
+                            select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and b.name = 'Down Beach'
+                            intersect   
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'ZOO Wroclaw Afrykarium' ));
+insert into tourist values (tou_seq.nextval,'Anna', 'Konarski', 789678123, 
+                           (select adres_id from adres where city = 'Biala Podlaska' and street = 'Brzeska' and house = 19),
+                           (select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and e.cityVisit = 'Biala Podlaska' and s.name = 'Saint Anne"s church' ));
+insert into tourist values (tou_seq.nextval,'Mikita', 'Furman', 133356135, 
+                           (select adres_id from adres where city = 'Zakopane' and street = 'Koscieliska' and house = 79),
+                           (select e.excursion_id from excursion e join bikeRaces b 
+                             on e.bikeRaces_id = b.bikeRaces_id and e.cityVisit = 'Zakopane' and b.name = 'Bukowina Tatrzanska'));
+insert into tourist values (tou_seq.nextval,'Valery', 'Malinowski', 776915341, 
+                           (select adres_id from adres where city = 'Lomza' and street = 'Harcerska' and house = 102),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Lomza' and m.name = 'North Mazowieckie' ));
+insert into tourist values (tou_seq.nextval,'Kate', 'Kopec', 791843135, 
+                           (select adres_id from adres where city = 'Warsaw' and street = 'Koszykowa' and house = 7),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Warsaw' and m.name = 'Fryderyk Chopin'
+                            intersect
+                            select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and b.name = 'Near Wisla'
+                            intersect   
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'Palace in Wilanow' ));
+insert into tourist values (tou_seq.nextval,'Viktor', 'Koj', 818931246, 
+                           (select adres_id from adres where city = 'Poznan' and street = 'Taczaka' and house = 180),
+                           (select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and e.cityVisit = 'Poznan' and b.name = 'Ground trail'));
+insert into tourist values (tou_seq.nextval,'Pasha', 'Kulesza', 248316391, 
+                           (select adres_id from adres where city = 'Sopot' and street = 'Krotka' and house = 55),
+                           (select e.excursion_id 
+                            from excursion e, sights s  
+                            where e.sights_id = s.sights_id and e.cityVisit = 'Sopot' and s.name = 'Pier in Sopot'
+                            intersect
+                            select excursion_id from excursion e
+                            where museum_id is null  ));
+insert into tourist values (tou_seq.nextval,'Mateusz', 'Katra', 339111316, 
+                           (select adres_id from adres where city = 'Lodz' and street = 'Obywatelska' and house = 97),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Lodz' and m.name = 'Art'
+                            intersect   
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'Planetarium EC1'));
+insert into tourist values (tou_seq.nextval,'Wojtek', 'Kobierski', 129579861, 
+                           (select adres_id from adres where city = 'Warsaw' and street = 'Zelazna' and house = 109),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Warsaw' and m.name = 'Centrum Nauki Kopernik'
+                            intersect
+                            select excursion_id from excursion e
+                            where sights_id is null));
+insert into tourist values (tou_seq.nextval,'Ewelina', 'Paszylka', 278348912, 
+                           (select adres_id from adres where city = 'Zakopane' and street = 'Lukaszowki' and house = 33),
+                           (select e.excursion_id from excursion e join bikeRaces b 
+                             on e.bikeRaces_id = b.bikeRaces_id and e.cityVisit = 'Zakopane' and b.name = 'Bukowina Tatrzanska'));
+insert into tourist values (tou_seq.nextval,'Jan', 'Piesio', 579324889, 
+                           (select adres_id from adres where city = 'Wroclaw' and street = 'Nowy Swiat' and house = 13),
+                           (select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and e.cityVisit = 'Wroclaw' and b.name = 'Down Beach'
+                            intersect   
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'Hydropolis' ));
+insert into tourist values (tou_seq.nextval,'Sylwia', 'Sitnik', 723860901, 
+                           (select adres_id from adres where city = 'Gdansk' and street = 'Hucisko' and house = 20),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Gdansk' and m.name = 'Archeological'
+                            intersect
+                            select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and b.name = 'Kaszebe Velo 3'
+                            intersect   
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'Crooked House' ));
+insert into tourist values (tou_seq.nextval,'Marcin', 'Bochenek', 923836124, 
+                           (select adres_id from adres where city = 'Warsaw' and street = 'Warynskiego' and house = 12),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Warsaw' and m.name = 'Royal Castle'
+                            intersect
+                            select e.excursion_id from excursion e, sights s  
+                            where e.sights_id = s.sights_id and s.name = 'Palace of Culture and Science' ));
+insert into tourist values (tou_seq.nextval,'Julia', 'Rzyska', 423517692, 
+                           (select adres_id from adres where city = 'Krakow' and street = 'Reformacka' and house = 47),
+                           (select e.excursion_id from excursion e, museum m  
+                            where e.museum_id = m.museum_id and e.cityVisit = 'Krakow' and m.name = 'Chartorical Palace'
+                            intersect
+                            select e.excursion_id from excursion e, bikeRaces b  
+                            where e.bikeRaces_id = b.bikeRaces_id and b.name = 'Poronin'));
+
+
+
+
+
+
+
+
+
+
+
+                            
+
+
